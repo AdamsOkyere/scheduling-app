@@ -22,3 +22,17 @@ export const formatTimeLabel = (date: Date) =>
     hour: 'numeric',
     minute: '2-digit',
   }).format(date);
+
+export const parseJsonResponse = async <T>(response: Response): Promise<T | null> => {
+  const text = await response.text();
+
+  if (!text.trim()) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(text) as T;
+  } catch {
+    throw new Error('The server returned an invalid response.');
+  }
+};

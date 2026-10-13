@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import { parseJsonResponse } from '@/lib/utils';
 
 export default function LookupPageClient() {
   const [reference, setReference] = useState('');
@@ -27,7 +28,7 @@ export default function LookupPageClient() {
 
     try {
       const response = await fetch(`/api/bookings/lookup?reference=${encodeURIComponent(reference)}&email=${encodeURIComponent(email)}`);
-      const data = await response.json();
+      const data = (await parseJsonResponse<{ booking?: any; error?: string }>(response)) ?? {};
       if (!response.ok) {
         throw new Error(data.error || 'Booking not found.');
       }
@@ -47,7 +48,7 @@ export default function LookupPageClient() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ reference: booking.reference, email: booking.email }),
     });
-    const data = await response.json();
+    const data = (await parseJsonResponse<{ error?: string }>(response)) ?? {};
     if (!response.ok) {
       setError(data.error || 'Unable to cancel booking.');
       return;

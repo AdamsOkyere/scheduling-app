@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
+import { parseJsonResponse } from '@/lib/utils';
 
 type AdminBooking = {
   id: string;
@@ -30,7 +31,7 @@ export default function AdminPageClient() {
             'X-Admin-Password': passwordValue,
           },
         });
-        const data = await response.json();
+        const data = (await parseJsonResponse<{ bookings?: AdminBooking[]; error?: string }>(response)) ?? {};
         if (!response.ok) {
           throw new Error(data.error || 'Unauthorized');
         }
@@ -72,7 +73,7 @@ export default function AdminPageClient() {
       body: JSON.stringify({ reference: '', email: '' }),
     });
 
-    const data = await response.json();
+    const data = (await parseJsonResponse<{ error?: string }>(response)) ?? {};
     if (!response.ok) {
       setError(data.error || 'Unable to cancel booking.');
       return;

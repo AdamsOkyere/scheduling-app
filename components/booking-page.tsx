@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { addDays, format, isBefore, startOfDay } from 'date-fns';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { WORKING_END_HOUR, WORKING_START_HOUR } from '@/lib/config';
+import { parseJsonResponse } from '@/lib/utils';
 
 export type Slot = {
   id: string;
@@ -57,7 +58,7 @@ export default function BookingPage() {
       setLoading(true);
       try {
         const response = await fetch(`/api/slots?date=${dateValue}`);
-        const data = await response.json();
+        const data = (await parseJsonResponse<{ slots?: Slot[]; error?: string }>(response)) ?? {};
         if (!response.ok) {
           throw new Error(data.error || 'Unable to load slots.');
         }
@@ -99,7 +100,7 @@ export default function BookingPage() {
           slotStart: selectedSlot.start,
         }),
       });
-      const data = await response.json();
+      const data = (await parseJsonResponse<{ booking?: { reference: string }; error?: string }>(response)) ?? {};
 
       if (!response.ok) {
         if (response.status === 409) {
@@ -142,12 +143,20 @@ export default function BookingPage() {
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-sky-600">Simple booking</p>
           <h1 className="mt-2 text-3xl font-bold text-slate-900">Choose your time</h1>
         </div>
-        <Link
-          href="/lookup"
-          className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-sky-300 hover:text-sky-700"
-        >
-          Lookup booking
-        </Link>
+        <div className="flex flex-wrap items-center gap-2">
+          <Link
+            href="/lookup"
+            className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-sky-300 hover:text-sky-700"
+          >
+            Lookup booking
+          </Link>
+          <Link
+            href="/admin"
+            className="rounded-full border border-slate-200 bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:border-slate-900 hover:bg-slate-700"
+          >
+            Admin
+          </Link>
+        </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[320px_1fr]">
